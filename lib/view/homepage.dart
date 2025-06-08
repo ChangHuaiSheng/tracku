@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 import 'package:tracku/view/loginscreen.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,10 +41,25 @@ class _HomePageState extends State<HomePage> {
       }
 
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      double lat = position.latitude;
+      double lng = position.longitude;
+      String timestamp = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+
       setState(() {
-        _location = 'Latitude: ${position.latitude},\nLongitude: ${position.longitude}';
+        _location = 'Latitude: $lat,\nLongitude: $lng';
         _isLoading = false;
       });
+
+      // Send data to the server
+      String userId = widget.username;
+      String url = 'https://muhdhadif.pythonanywhere.com/api/insert_gps_data/$userId/$lat/$lng/$timestamp';
+      final response = await http.post(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        print('GPS data submitted successfully.');
+      } else {
+        print('Failed to submit GPS data: ${response.statusCode}');
+      }
     } catch (e) {
       setState(() {
         _location = 'Error: $e';
@@ -151,3 +168,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
