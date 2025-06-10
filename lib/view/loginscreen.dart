@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:tracku/view/homepage.dart';
 import 'package:tracku/view/registerscreen.dart';
 
@@ -14,12 +16,33 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomePage(username: emailController.text)),
-      );
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+
+      final response = await http.get(Uri.parse(
+          'https://muhdhadif.pythonanywhere.com/api/login_user/$email/$password'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['id'] != 0) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => HomePage(username: data['name'] ?? email),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid credentials')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Server error')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fix the errors before logging in.')),
@@ -109,7 +132,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: Text(
                         "Don't have an account? Register",
-                        style: TextStyle(color: Colors.deepPurple.shade700, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.deepPurple.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],

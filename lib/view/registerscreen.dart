@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:tracku/view/loginscreen.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -15,8 +16,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void _register() {
-    if (_formKey.currentState!.validate()) {
+  void _register() async {
+  if (_formKey.currentState!.validate()) {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    final response = await http.post(Uri.parse(
+        'https://muhdhadif.pythonanywhere.com/api/register_user/$email/$name/$password'));
+
+    if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registered successfully')),
       );
@@ -24,8 +33,13 @@ class _RegisterPageState extends State<RegisterPage> {
         context,
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registration failed')),
+      );
     }
   }
+}
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) return 'Email is required';
