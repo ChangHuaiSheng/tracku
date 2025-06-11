@@ -192,15 +192,34 @@ def login_user(email, password):
     else:
         return jsonify(User(id=0))
 
-# API enpoint to insert GPS data
+# API endpoint to insert GPS data
 @app.route('/api/insert_gps_data/<user_email>/<latitude>/<longitude>/<timestamp>', methods=['POST'])
 def insert_gps_data(user_email, latitude, longitude, timestamp):
-    timestamp_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-    gps_entry = GpsData(user_email=user_email, latitude=latitude, longitude=longitude, timestamp=timestamp_obj)
-    db.session.add(gps_entry)
-    db.session.commit()
+    try:
+        timestamp_obj = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+        gps_entry = GpsData(user_email=user_email, latitude=latitude, longitude=longitude, timestamp=timestamp_obj)
+        db.session.add(gps_entry)
+        db.session.commit()
+    except exc.SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        print(error)
+        return Response("{'status':'failed'}", status=403)
     print("GPS data added.")
-    return "Insert success!"
+    return Response("{'status':'success'}", status=200)
+
+# API endpoint to delete GPS data
+@app.route('/api/delete_gps_data/<gps_id>', methods=['POST'])
+def delete_gps_data(gps_id):
+    try:
+        gps_entry = GpsData.query.filter_by(id=gps_id).first()
+        db.session.delete(gps_entry)
+        db.session.commit()
+    except exc.SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        print(error)
+        return Response("{'status':'failed'}", status=403)
+    print("GPS data deleted.")
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     create_tables_and_data()

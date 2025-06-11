@@ -69,7 +69,7 @@
             font-weight: bold;
             color: #34495e;
         }
-        .logout-button {
+        .logout-button, .delete-button {
             background-color: #e74c3c; /* Red for logout */
             color: white;
             padding: 8px 15px;
@@ -104,6 +104,7 @@
                     <th>Latitude</th>
                     <th>Longitude</th>
                     <th>Timestamp</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,6 +139,11 @@
                     row.insertCell().innerText = entry.latitude.toFixed(6);
                     row.insertCell().innerText = entry.longitude.toFixed(6);
                     row.insertCell().innerText = new Date(entry.timestamp).toLocaleString();
+                    row.insertCell().innerHTML = 
+                    '<form id="delete-form'+ entry.id + '" method="post" action="api/delete_gps_data/'+ entry.id + '">' +
+                        // '<input type="hidden" name="gps_id" value='+ entry.id + '>' +
+                        '<button class="delete-button" onclick="document.getElementById(\'delete-form'+ entry.id + '\').submit();">X</button>' +
+                    '</form>'
                 });
 
                 // If no data, display a message in the table
