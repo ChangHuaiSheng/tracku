@@ -30,7 +30,10 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => HomePage(username: data['name'] ?? email),
+              builder: (_) => HomePage(
+                username: data['name'] ?? email,
+                email: email, 
+              ),
             ),
           );
         } else {
@@ -43,10 +46,6 @@ class _LoginPageState extends State<LoginPage> {
           const SnackBar(content: Text('Server error')),
         );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fix the errors before logging in.')),
-      );
     }
   }
 

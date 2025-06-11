@@ -6,7 +6,9 @@ import 'package:tracku/view/loginscreen.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
-  const HomePage({Key? key, required this.username}) : super(key: key);
+  final String email;
+
+  const HomePage({Key? key, required this.username, required this.email}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -51,8 +53,8 @@ class _HomePageState extends State<HomePage> {
       });
 
       // Send data to the server
-      String userId = widget.username;
-      String url = 'https://muhdhadif.pythonanywhere.com/api/insert_gps_data/$userId/$lat/$lng/$timestamp';
+      String email = widget.email;
+      String url = 'https://muhdhadif.pythonanywhere.com/api/insert_gps_data/$email/$lat/$lng/$timestamp';
       final response = await http.post(Uri.parse(url));
 
       if (response.statusCode == 200) {
