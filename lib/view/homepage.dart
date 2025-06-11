@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -8,20 +10,20 @@ class HomePage extends StatefulWidget {
   final String username;
   final String email;
 
-  const HomePage({Key? key, required this.username, required this.email}) : super(key: key);
+  const HomePage({super.key, required this.username, required this.email});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String _location = '';
-  bool _isLoading = true;
+  String _location = 'Ready to check in!';
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _getLocation();
+    // _getLocation();
   }
 
   Future<void> _getLocation() async {
@@ -47,20 +49,23 @@ class _HomePageState extends State<HomePage> {
       double lng = position.longitude;
       String timestamp = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
 
-      setState(() {
-        _location = 'Latitude: $lat,\nLongitude: $lng';
-        _isLoading = false;
-      });
-
       // Send data to the server
       String email = widget.email;
       String url = 'https://muhdhadif.pythonanywhere.com/api/insert_gps_data/$email/$lat/$lng/$timestamp';
       final response = await http.post(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        print('GPS data submitted successfully.');
+        log('GPS data submitted successfully.');
+        setState(() {
+          _location = 'Latitude: $lat,\nLongitude: $lng';
+          _isLoading = false;
+        });
       } else {
-        print('Failed to submit GPS data: ${response.statusCode}');
+        log('Failed to submit GPS data: ${response.statusCode}');
+        setState(() {
+          _location = 'An error occurred, please try again. (${response.statusCode})';
+          _isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {
